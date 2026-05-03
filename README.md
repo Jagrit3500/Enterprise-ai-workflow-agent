@@ -1,7 +1,9 @@
 # Enterprise AI Workflow Agent
 ### PDF-Grounded Conversational System
 
-A strictly grounded RAG-based conversational agent that answers questions exclusively from uploaded PDFs with page-level citations.
+A strictly grounded RAG-based conversational agent that answers questions exclusively from uploaded PDFs with page-level citations. Minimizes hallucination through strict grounding and validation. Every answer is cited. Out-of-scope questions are refused.
+
+---
 
 ## Features
 
@@ -11,7 +13,9 @@ A strictly grounded RAG-based conversational agent that answers questions exclus
 - Configurable similarity threshold via UI slider
 - Full observability with debug panel
 - Conversation history for follow-up questions
-- Dynamic K retrieval based on PDF size
+- Dynamic K retrieval scales with PDF size
+
+---
 
 ## Tech Stack
 
@@ -22,6 +26,8 @@ A strictly grounded RAG-based conversational agent that answers questions exclus
 | Vector DB | ChromaDB |
 | LLM | Groq (llama-3.3-70b-versatile) |
 | Frontend | Streamlit |
+
+---
 
 ## Project Structure
 
@@ -35,20 +41,22 @@ enterprise-ai-workflow-agent/
 │   ├── llm_agent.py            # Grounded LLM + chat history
 │   └── citation_validator.py  # Citation validation + confidence
 ├── tests/
-│   ├── test_parser.py
-│   ├── test_retriever.py
-│   └── test_agent.py
+│   ├── test_parser.py          # 9 tests
+│   ├── test_retriever.py       # 11 tests
+│   └── test_agent.py           # 13 tests
 ├── docs/
-│   ├── technical_note.md
-│   └── test_cases.md
-├── uploads/
-├── chroma_db/
+│   ├── technical_note.md       # Architecture + decisions
+│   └── test_cases.md           # Test instructions for evaluators
+├── uploads/                    # runtime (ignored)
+├── chroma_db/                  # runtime (ignored)
 ├── app.py
 ├── .env.example
 ├── .gitignore
 ├── README.md
 └── requirements.txt
 ```
+
+---
 
 ## Setup Instructions
 
@@ -70,34 +78,17 @@ pip install -r requirements.txt
 ```
 
 ### 4. Configure environment
-Copy `.env.example` to `.env` and fill in your values:
+Copy `.env.example` to `.env` and fill in your Groq API key:
 ```bash
 cp .env.example .env
-```
-
-Contents of `.env.example`:
-```
-GROQ_API_KEY=your_groq_api_key_here
-GROQ_MODEL=llama-3.3-70b-versatile
-MAX_TOKENS=1024
-TEMPERATURE=0.0
-EMBEDDING_MODEL=all-MiniLM-L6-v2
-EMBEDDING_BATCH_SIZE=50
-CHUNK_SIZE=900
-CHUNK_OVERLAP=150
-CHROMA_DB_PATH=chroma_db
-COLLECTION_NAME=pdf_chunks
-TOP_K_RESULTS=5
-SIMILARITY_THRESHOLD=0.60
-UPLOAD_DIR=uploads
-TRANSFORMERS_OFFLINE=1
-HF_DATASETS_OFFLINE=1
 ```
 
 ### 5. Run the app
 ```bash
 streamlit run app.py
 ```
+
+---
 
 ## Usage
 
@@ -107,13 +98,42 @@ streamlit run app.py
 4. Adjust similarity threshold slider if needed
 5. Out-of-scope questions are automatically refused
 
+---
+
+## Quick Demo
+
+1. Upload a PDF
+2. Ask: "What is this document about?"
+3. Ask: "Summarize the key points"
+4. Ask: "Who is the CEO of Google?"
+
+Expected:
+- First two → grounded answers with citations
+- Last → refusal
+
+This demonstrates strict grounding and hallucination prevention.
+
+---
+
+## Architecture
+
+```text
+PDF Upload → Parser → Chunker → Embedder → ChromaDB
+User Query → Query Enricher → Retriever → Evidence Filter
+Grounded LLM Agent → Citation Validator → Final Answer / Refusal
+```
+
+---
+
 ## Threshold Guide
 
 | Threshold | Behavior |
 |---|---|
-| 0.50-0.60 | Balanced — answers more questions |
-| 0.65-0.75 | Recommended — strict grounding |
-| 0.75-0.90 | Very strict — only high confidence answers |
+| 0.50–0.60 | Balanced — answers more questions |
+| 0.65–0.75 | Recommended — strict grounding |
+| 0.75–0.90 | Very strict — only high confidence answers |
+
+---
 
 ## Dynamic K Retrieval
 
@@ -124,36 +144,39 @@ streamlit run app.py
 | Medium-large | 151–450 chunks | 15 |
 | Very large | > 450 chunks | 20 |
 
+---
+
 ## Large PDF Validation
 
 Tested on a 68-page McKinsey report with 216 indexed chunks. Dynamic K increased retrieval depth to 15 chunks and correctly answered numeric and business-function questions with citations.
 
-## Test Cases
+---
 
-See `docs/test_cases.md` for full test cases.
+## Tests
 
-### Quick Test — Valid Queries
-1. What is this document about?
-2. What are the main topics covered?
-3. Summarize the key points.
-4. What are the requirements mentioned?
-5. What activities are included?
+33 tests across 3 files — all passing.
 
-### Quick Test — Invalid Queries
-1. Who is the CEO of Google?
-2. What is the capital of France?
-3. Explain quantum computing.
-
-## Architecture
-
-```text
-PDF Upload → Parser → Chunker → Embedder → ChromaDB
-User Query → Query Enricher → Retriever → Evidence Filter
-Grounded LLM Agent → Citation Validator → Final Answer / Refusal
+```bash
+python tests/test_parser.py
+python tests/test_retriever.py
+python tests/test_agent.py
 ```
+
+See `docs/test_cases.md` for full evaluator test instructions.
+
+---
 
 ## Limitations
 
 - Numeric queries may need richer phrasing
 - Scanned PDFs without text layer not supported
 - Cross-page sentences may split between chunks
+
+---
+
+## Multilingual Support
+
+The system responds in the same language the user writes in.
+Citations remain in English format [Page X] regardless of language.
+
+Tested languages: English, Hindi, Spanish

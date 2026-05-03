@@ -86,7 +86,7 @@ with st.sidebar:
             help="Lower = answers more questions. Higher = stricter grounding."
         )
 
-        st.caption("Recommended: 0.65–0.75 for stricter grounding")
+        st.caption("Recommended: 0.65–0.75 for English | 0.50–0.55 for multilingual")
 
         # Preset buttons
         col1, col2 = st.columns(2)
