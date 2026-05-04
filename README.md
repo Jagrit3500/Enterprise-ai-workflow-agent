@@ -1,6 +1,10 @@
 # Enterprise AI Workflow Agent
 ### PDF-Grounded Conversational System
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit)](https://enterprise-ai-workflow-agent-9kzrt6ok4vjktzwccpdguc.streamlit.app/)
+
+[![Demo Video](https://img.shields.io/badge/Demo%20Video-Google%20Drive-4285F4?style=for-the-badge&logo=googledrive)](https://drive.google.com/file/d/1vyWUq-QfFEdc9MKBe1tX46A-aPx3qsp-/view?usp=sharing)
+
 A strictly grounded RAG-based conversational agent that answers questions exclusively from uploaded PDFs with page-level citations. Minimizes hallucination through strict grounding and validation. Every answer is cited. Out-of-scope questions are refused.
 
 ---
@@ -163,6 +167,14 @@ python tests/test_agent.py
 ```
 
 See `docs/test_cases.md` for full evaluator test instructions.
+
+---
+
+## Live Demo & Video
+
+- 🌐 **Deployed App:** https://enterprise-ai-workflow-agent-9kzrt6ok4vjktzwccpdguc.streamlit.app/
+
+- 🎥 **Demo Video:** https://drive.google.com/file/d/1vyWUq-QfFEdc9MKBe1tX46A-aPx3qsp-/view?usp=sharing
 
 ---
 
